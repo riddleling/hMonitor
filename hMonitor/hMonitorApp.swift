@@ -11,7 +11,7 @@ import SwiftUI
 struct hMonitorApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView()
         }
     }
 }
