@@ -12,6 +12,9 @@ struct hMonitorApp: App {
     var body: some Scene {
         WindowGroup {
             DashboardView()
+                .onAppear {
+                    UIApplication.shared.isIdleTimerDisabled = true
+                }
         }
     }
 }
