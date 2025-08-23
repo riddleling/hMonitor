@@ -40,7 +40,7 @@ struct CPUCard: View {
                 LineChart(values: snapshots.suffix(120).map { $0.cpuTotal })
                     .frame(height: 56)
             }
-            // ⬇️ 每核心列
+            // 每核心列
             if let per = current?.perCoreCPU, !per.isEmpty {
                 Divider().opacity(0.2)
                 PerCoreBars(values: per)

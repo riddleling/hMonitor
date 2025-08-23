@@ -87,6 +87,7 @@ final class SystemMonitor: ObservableObject {
 }
 
 // MARK: - SystemMonitor: Low-level readers
+
 extension SystemMonitor {
     struct MemoryInfo {
         let used: UInt64
