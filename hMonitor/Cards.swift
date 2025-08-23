@@ -13,6 +13,10 @@ import Network
 struct CPUCard: View {
     let snapshots: [ResourceSnapshot]
     var current: ResourceSnapshot? { snapshots.last }
+    
+    private func color(for usage: Double) -> Color {
+        usage < 0.5 ? .green : (usage < 0.8 ? .yellow : .red)
+    }
 
     var body: some View {
         Card {
@@ -29,6 +33,7 @@ struct CPUCard: View {
                 Spacer()
                 Gauge(value: current?.cpuTotal ?? 0) { Text("") }
                     .gaugeStyle(.accessoryCircularCapacity)
+                    .tint(color(for: current?.cpuTotal ?? 0))
                     .frame(width: 60, height: 60)
             }
             if snapshots.count > 2 {
@@ -53,8 +58,14 @@ struct PerCoreBars: View {
                     Text("Core \(idx + 1)")
                         .font(.caption2)
                         .frame(minWidth: 50, alignment: .leading)
-                    ProgressView(value: v)
-                        .frame(height: 6)
+                    ProgressView(value: v) {
+                        EmptyView()
+                    } currentValueLabel: {
+                        EmptyView()
+                    }
+                    .progressViewStyle(.linear)
+                    .tint(v < 0.5 ? .green : (v < 0.8 ? .yellow : .red))
+                    .frame(height: 6)
                     Text(String(format: "%.0f%%", v * 100))
                         .font(.caption2)
                         .monospacedDigit()
@@ -121,14 +132,59 @@ struct ThermalCard: View {
 struct BatteryCard: View {
     let snapshots: [ResourceSnapshot]
     var current: ResourceSnapshot? { snapshots.last }
+    
+    private func color(for level: Float) -> Color {
+        if level < 0.3 { return .red }
+        else if level < 0.6 { return .yellow }
+        else { return .green }
+    }
 
+    private func batteryBaseSymbol(level: Float) -> String {
+        let pct = Int((level * 100).rounded())
+        switch pct {
+        case ..<15:    return "battery.0percent"
+        case 15..<40:  return "battery.25percent"
+        case 40..<65:  return "battery.50percent"
+        case 65..<90:  return "battery.75percent"
+        default:       return "battery.100percent"
+        }
+    }
+    
     var body: some View {
         Card {
-            HStack { Image(systemName: "battery.100"); Text("Battery") }
-                .font(.headline)
+            HStack(spacing: 8) {
+                if let level = current?.batteryLevel {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: batteryBaseSymbol(level: level))
+                            .foregroundStyle(color(for: level))
+
+                        if current?.batteryState == .charging {
+                            Image(systemName: "bolt.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                                .padding(2) // 留點內距
+                                .background(
+                                    Circle().fill(Color(.systemBackground)) // 讓閃電在深/淺背景都清楚
+                                )
+                                .offset(x: 6, y: -6) // 視覺調位
+                        }
+                    }
+                } else {
+                    Image(systemName: "battery.0percent")
+                        .foregroundStyle(.secondary)
+                }
+
+                Text("Battery")
+                    .font(.headline)
+                Spacer()
+            }
+            
             if let level = current?.batteryLevel {
                 HStack {
                     ProgressView(value: Double(level))
+                        .tint(color(for: level))
+                        .progressViewStyle(.linear)
+                        .frame(height: 8)
                     Text("\(Int(level * 100))%")
                         .font(.subheadline)
                         .monospacedDigit()
