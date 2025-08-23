@@ -35,6 +35,32 @@ struct CPUCard: View {
                 LineChart(values: snapshots.suffix(120).map { $0.cpuTotal })
                     .frame(height: 56)
             }
+            // ⬇️ 每核心列
+            if let per = current?.perCoreCPU, !per.isEmpty {
+                Divider().opacity(0.2)
+                PerCoreBars(values: per)
+            }
+        }
+    }
+}
+
+struct PerCoreBars: View {
+    let values: [Double]
+    var body: some View {
+        VStack(spacing: 6) {
+            ForEach(Array(values.enumerated()), id: \.0) { idx, v in
+                HStack(spacing: 8) {
+                    Text("Core \(idx + 1)")
+                        .font(.caption2)
+                        .frame(minWidth: 50, alignment: .leading)
+                    ProgressView(value: v)
+                        .frame(height: 6)
+                    Text(String(format: "%.0f%%", v * 100))
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .frame(width: 40, alignment: .trailing)
+                }
+            }
         }
     }
 }
