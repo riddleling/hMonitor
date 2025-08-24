@@ -69,7 +69,7 @@ struct PerCoreBars: View {
                     Text(String(format: "%.0f%%", v * 100))
                         .font(.caption2)
                         .monospacedDigit()
-                        .frame(width: 40, alignment: .trailing)
+                        .frame(minWidth: 44, alignment: .trailing)
                 }
             }
         }
