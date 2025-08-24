@@ -58,6 +58,7 @@ struct PerCoreBars: View {
                     Text("Core \(idx + 1)")
                         .font(.caption2)
                         .frame(minWidth: 50, alignment: .leading)
+                        .minimumScaleFactor(0.8)
                     ProgressView(value: v) {
                         EmptyView()
                     } currentValueLabel: {
@@ -70,6 +71,7 @@ struct PerCoreBars: View {
                         .font(.caption2)
                         .monospacedDigit()
                         .frame(minWidth: 44, alignment: .trailing)
+                        .minimumScaleFactor(0.8)
                 }
             }
         }
