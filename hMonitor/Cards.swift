@@ -14,6 +14,8 @@ struct CPUCard: View {
     let snapshots: [ResourceSnapshot]
     var current: ResourceSnapshot? { snapshots.last }
     
+    @State private var showPerCore = false
+    
     private func color(for usage: Double) -> Color {
         usage < 0.5 ? .green : (usage < 0.8 ? .yellow : .red)
     }
@@ -29,6 +31,10 @@ struct CPUCard: View {
                         .font(.headline)
                     Text(current?.cpuTotal.percentString ?? "--")
                         .font(.system(size: 28, weight: .bold))
+                        .frame(width: 90, alignment: .trailing)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 Spacer()
                 Gauge(value: current?.cpuTotal ?? 0) { Text("") }
@@ -40,10 +46,23 @@ struct CPUCard: View {
                 LineChart(values: snapshots.suffix(120).map { $0.cpuTotal })
                     .frame(height: 56)
             }
-            // 每核心列
+            // 每核心（收合區塊）
             if let per = current?.perCoreCPU, !per.isEmpty {
-                Divider().opacity(0.2)
-                PerCoreBars(values: per)
+                DisclosureGroup(
+                    isExpanded: $showPerCore,
+                    content: {
+                        PerCoreBars(values: per)
+                            .padding(.top, 8)
+                    },
+                    label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "square.stack.3d.down.right")
+                            Text("Per-core (\(per.count))")
+                        }
+                        .contentShape(Rectangle()) // 讓整條好點擊
+                    }
+                )
+                .animation(.easeInOut, value: showPerCore)
             }
         }
     }
@@ -67,10 +86,10 @@ struct PerCoreBars: View {
                     .progressViewStyle(.linear)
                     .tint(v < 0.5 ? .green : (v < 0.8 ? .yellow : .red))
                     .frame(height: 6)
-                    Text(String(format: "%.0f%%", v * 100))
+                    Text(String(format: "%.1f%%", v * 100))
                         .font(.caption2)
                         .monospacedDigit()
-                        .frame(minWidth: 44, alignment: .trailing)
+                        .frame(minWidth: 50, alignment: .trailing)
                         .minimumScaleFactor(0.8)
                 }
             }
